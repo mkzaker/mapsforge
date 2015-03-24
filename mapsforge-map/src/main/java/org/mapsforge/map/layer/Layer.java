@@ -25,8 +25,31 @@ public abstract class Layer {
 	protected DisplayModel displayModel;
 	private Redrawer assignedRedrawer;
 	private boolean visible = true;
+    private Object tag;
+    protected OnLayerPressListener onLayerPressListener;
 
-	/**
+    public void setOnLayerPressListener(OnLayerPressListener onLayerPressListener) {
+        this.onLayerPressListener = onLayerPressListener;
+    }
+
+    public Object getTag() {
+        return tag;
+    }
+
+    public void setTag(Object tag) {
+        this.tag = tag;
+    }
+
+    public interface OnLayerPressListener {
+
+        boolean onTapLayer(Layer layer, LatLong tapLatLong, Point layerXY, Point tapXY);
+
+        boolean onLongPressLayer(Layer layer, LatLong tapLatLong, Point layerXY, Point tapXY);
+
+    }
+
+
+    /**
 	 * Draws this {@code Layer} on the given canvas.
 	 * 
 	 * @param boundingBox
@@ -77,7 +100,10 @@ public abstract class Layer {
 	 * @return true if the long press event was handled, false otherwise.
 	 */
 	public boolean onLongPress(LatLong tapLatLong, Point layerXY, Point tapXY) {
-		return false;
+        if (onLayerPressListener != null) {
+            return onLayerPressListener.onLongPressLayer(this, tapLatLong, layerXY, tapXY);
+        }
+        return false;
 	}
 
 	/**
@@ -96,7 +122,10 @@ public abstract class Layer {
 	 */
 
 	public boolean onTap(LatLong tapLatLong, Point layerXY, Point tapXY) {
-		return false;
+        if (onLayerPressListener != null) {
+            return onLayerPressListener.onTapLayer(this, tapLatLong, layerXY, tapXY);
+        }
+        return false;
 	}
 
 	/**

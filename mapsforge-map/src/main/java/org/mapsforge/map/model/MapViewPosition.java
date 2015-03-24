@@ -27,6 +27,8 @@ import org.mapsforge.map.util.PausableThread;
 
 public class MapViewPosition extends Observable implements Persistable {
 
+    private OnZoomLevelChanged onZoomLevelChanged;
+
 	class ZoomAnimator extends PausableThread {
 
 		// debugging tip: for investigating what happens during the zoom animation
@@ -461,6 +463,21 @@ public class MapViewPosition extends Observable implements Persistable {
 	private void setZoomLevelInternal(int zoomLevel) {
 		this.zoomLevel = (byte) Math.max(Math.min(zoomLevel, this.zoomLevelMax), this.zoomLevelMin);
 		this.zoomAnimator.startAnimation(this.getScaleFactor(), Math.pow(2, this.zoomLevel));
+        if (onZoomLevelChanged != null) {
+            onZoomLevelChanged.onZoomChanged();
+        }
 	}
 
+
+    public interface OnZoomLevelChanged {
+        void onZoomChanged();
+    }
+
+    public OnZoomLevelChanged getOnZoomLevelChanged() {
+        return onZoomLevelChanged;
+    }
+
+    public void setOnZoomLevelChanged(OnZoomLevelChanged onZoomLevelChanged) {
+        this.onZoomLevelChanged = onZoomLevelChanged;
+    }
 }

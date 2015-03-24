@@ -45,6 +45,22 @@ import android.os.Bundle;
  * (otherwise no DisplayModel is set).
  */
 public class MyLocationOverlay extends Layer implements LocationListener {
+
+    public OnLocationOverlayListeners getOnLocationOverlayListeners() {
+        return onLocationOverlayListeners;
+    }
+
+    public void setOnLocationOverlayListeners(OnLocationOverlayListeners onLocationOverlayListeners) {
+        this.onLocationOverlayListeners = onLocationOverlayListeners;
+    }
+
+    public interface OnLocationOverlayListeners {
+        void onStartLocate(boolean providerEnabled);
+
+        void onReceiveLocation(Location location);
+    }
+
+    private OnLocationOverlayListeners onLocationOverlayListeners;
 	private static final GraphicFactory GRAPHIC_FACTORY = AndroidGraphicFactory.INSTANCE;
 	private float minDistance = 0.0f;
 	private long minTime = 0;
@@ -129,6 +145,7 @@ public class MyLocationOverlay extends Layer implements LocationListener {
 			this.myLocationEnabled = false;
 			this.locationManager.removeUpdates(this);
 			// TODO trigger redraw?
+            requestRedraw();
 		}
 	}
 
@@ -214,6 +231,11 @@ public class MyLocationOverlay extends Layer implements LocationListener {
 				this.mapViewPosition.setCenter(latLong);
 			}
 
+
+            if (onLocationOverlayListeners != null) {
+                onLocationOverlayListeners.onReceiveLocation(location);
+            }
+
 			requestRedraw();
 		}
 	}
@@ -268,6 +290,9 @@ public class MyLocationOverlay extends Layer implements LocationListener {
 				this.locationManager.requestLocationUpdates(provider, minTime, minDistance, this);
 			}
 		}
+        if (onLocationOverlayListeners != null) {
+            onLocationOverlayListeners.onStartLocate(result);
+        }
 		this.myLocationEnabled = result;
 		return result;
 	}

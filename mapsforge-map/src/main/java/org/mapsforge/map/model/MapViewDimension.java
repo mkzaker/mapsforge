@@ -18,6 +18,17 @@ import org.mapsforge.core.model.Dimension;
 import org.mapsforge.map.model.common.Observable;
 
 public class MapViewDimension extends Observable {
+
+    public void setMapViewDimensionListener(OnMapViewDimensionListener mListener) {
+        this.mListener = mListener;
+    }
+
+    public interface OnMapViewDimensionListener {
+        void onAfterDimensionSet(MapViewDimension mapViewDimension);
+    }
+
+    private OnMapViewDimensionListener mListener;
+
 	private Dimension dimension;
 
 	/**
@@ -30,6 +41,9 @@ public class MapViewDimension extends Observable {
 	public void setDimension(Dimension dimension) {
 		synchronized (this) {
 			this.dimension = dimension;
+            if (mListener != null) {
+                mListener.onAfterDimensionSet(this);
+            }
 		}
 		notifyObservers();
 	}

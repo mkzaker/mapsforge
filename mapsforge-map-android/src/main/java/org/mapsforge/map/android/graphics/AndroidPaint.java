@@ -34,6 +34,7 @@ import android.graphics.Shader;
 import android.graphics.Shader.TileMode;
 import android.graphics.Typeface;
 import android.os.Build;
+import org.mapsforge.map.android.MapApplication;
 
 
 class AndroidPaint implements Paint {
@@ -111,7 +112,7 @@ class AndroidPaint implements Paint {
 	private static Typeface getTypeface(org.mapsforge.core.graphics.FontFamily fontFamily) {
 		switch (fontFamily) {
 			case DEFAULT:
-				return Typeface.DEFAULT;
+				return MapApplication.getTypeface();
 			case MONOSPACE:
 				return Typeface.MONOSPACE;
 			case SANS_SERIF:
