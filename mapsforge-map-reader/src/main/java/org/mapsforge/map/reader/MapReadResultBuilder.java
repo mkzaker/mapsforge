@@ -17,22 +17,22 @@ package org.mapsforge.map.reader;
 import java.util.ArrayList;
 import java.util.List;
 
-class MapReadResultBuilder {
-	boolean isWater;
-	final List<PointOfInterest> pointOfInterests;
-	final List<Way> ways;
+public class MapReadResultBuilder {
+    boolean isWater;
+    final List<PointOfInterest> pointOfInterests;
+    final List<Way> ways;
 
-	MapReadResultBuilder() {
-		this.pointOfInterests = new ArrayList<PointOfInterest>();
-		this.ways = new ArrayList<Way>();
-	}
+    public MapReadResultBuilder() {
+        this.pointOfInterests = new ArrayList<PointOfInterest>();
+        this.ways = new ArrayList<Way>();
+    }
 
-	void add(PoiWayBundle poiWayBundle) {
-		this.pointOfInterests.addAll(poiWayBundle.pois);
-		this.ways.addAll(poiWayBundle.ways);
-	}
+    public void add(PoiWayBundle poiWayBundle) {
+        this.pointOfInterests.addAll(poiWayBundle.pois);
+        this.ways.addAll(poiWayBundle.ways);
+    }
 
-	MapReadResult build() {
-		return new MapReadResult(this);
-	}
+    public MapReadResult build() {
+        return new MapReadResult(this);
+    }
 }

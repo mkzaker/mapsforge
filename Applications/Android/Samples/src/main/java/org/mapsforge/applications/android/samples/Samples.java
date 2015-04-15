@@ -92,11 +92,13 @@ public class Samples extends Activity {
 
 		linearLayout.addView(createLabel("Raster Maps"));
 		linearLayout.addView(createButton(DownloadLayerViewer.class,
-				"Downloading Mapnik", null));
+                "Downloading Mapnik", null));
 		linearLayout.addView(createButton(DownloadCustomLayerViewer.class,
 				"Custom Tile Source", null));
 		linearLayout.addView(createButton(TileStoreLayerViewer.class,
 				"Tile Store (TMS)", null));
+		linearLayout.addView(createButton(CiyamSample.class,
+				"Ciyam", null));
 
 		linearLayout.addView(createLabel("Overlays"));
 		linearLayout.addView(createButton(OverlayMapViewer.class, "Overlay", null));

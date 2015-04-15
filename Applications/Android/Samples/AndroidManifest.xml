@@ -64,6 +64,10 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="RenderTheme V4" />
         <activity
+            android:name=".CiyamSample"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="Ciyam" />
+        <activity
             android:name=".TwoMaps"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="Two Maps Overlaid" />

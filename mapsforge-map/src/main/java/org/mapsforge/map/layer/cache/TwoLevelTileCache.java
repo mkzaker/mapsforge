@@ -19,93 +19,98 @@ import org.mapsforge.core.graphics.TileBitmap;
 import org.mapsforge.map.layer.queue.Job;
 
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Set;
 
 public class TwoLevelTileCache implements TileCache {
 
 
-	private final TileCache firstLevelTileCache;
-	private final TileCache secondLevelTileCache;
-	private final Set<Job> workingSet;
+    private final TileCache firstLevelTileCache;
+    private final TileCache secondLevelTileCache;
+    private final Set<Job> workingSet;
 
-	public TwoLevelTileCache(TileCache firstLevelTileCache, TileCache secondLevelTileCache) {
-		this.firstLevelTileCache = firstLevelTileCache;
-		this.secondLevelTileCache = secondLevelTileCache;
-		this.workingSet = Collections.synchronizedSet(new HashSet<Job>());
-	}
+    public TwoLevelTileCache(TileCache firstLevelTileCache, TileCache secondLevelTileCache) {
+        this.firstLevelTileCache = firstLevelTileCache;
+        this.secondLevelTileCache = secondLevelTileCache;
+        this.workingSet = Collections.synchronizedSet(new HashSet<Job>());
+    }
 
-	@Override
-	public boolean containsKey(Job key) {
-		if (this.firstLevelTileCache.containsKey(key)) {
-			return true;
-		}
-		return this.secondLevelTileCache.containsKey(key);
-	}
+    @Override
+    public boolean containsKey(Job key) {
+        if (this.firstLevelTileCache.containsKey(key)) {
+            return true;
+        }
+        return this.secondLevelTileCache.containsKey(key);
+    }
 
-	@Override
-	public void destroy() {
-		this.firstLevelTileCache.destroy();
-		this.secondLevelTileCache.destroy();
-	}
+    @Override
+    public void destroy() {
+        this.firstLevelTileCache.destroy();
+        this.secondLevelTileCache.destroy();
+    }
 
-	@Override
-	public TileBitmap get(Job key) {
-		TileBitmap returnBitmap = this.firstLevelTileCache.get(key);
-		if (returnBitmap != null) {
-			return returnBitmap;
-		}
-		returnBitmap = this.secondLevelTileCache.get(key);
-		if (returnBitmap != null) {
-			this.firstLevelTileCache.put(key, returnBitmap);
-			return returnBitmap;
-		}
-		return null;
-	}
+    @Override
+    public TileBitmap get(Job key) {
+        TileBitmap returnBitmap = this.firstLevelTileCache.get(key);
+        if (returnBitmap != null) {
+            return returnBitmap;
+        }
+        returnBitmap = this.secondLevelTileCache.get(key);
+        if (returnBitmap != null) {
+            this.firstLevelTileCache.put(key, returnBitmap);
+            return returnBitmap;
+        }
+        return null;
+    }
 
-	@Override
-	public int getCapacity() {
-		return Math.max(this.firstLevelTileCache.getCapacity(), this.secondLevelTileCache.getCapacity());
-	}
+    @Override
+    public int getCapacity() {
+        return Math.max(this.firstLevelTileCache.getCapacity(), this.secondLevelTileCache.getCapacity());
+    }
 
-	@Override
-	public int getCapacityFirstLevel() {
-		return this.firstLevelTileCache.getCapacity();
-	}
+    @Override
+    public int getCapacityFirstLevel() {
+        return this.firstLevelTileCache.getCapacity();
+    }
 
-	@Override
-	public TileBitmap getImmediately(Job key) {
-		return firstLevelTileCache.get(key);
-	}
+    @Override
+    public TileBitmap getImmediately(Job key) {
+        return firstLevelTileCache.get(key);
+    }
 
-	@Override
-	public void purge() {
-		this.firstLevelTileCache.purge();
-		this.secondLevelTileCache.purge();
-	}
+    @Override
+    public void purge() {
+        this.firstLevelTileCache.purge();
+        this.secondLevelTileCache.purge();
+    }
 
-	@Override
-	public void put(Job key, TileBitmap bitmap) {
-		if (this.workingSet.contains(key)) {
-			this.firstLevelTileCache.put(key, bitmap);
-		}
-		this.secondLevelTileCache.put(key, bitmap);
-	}
+    @Override
+    public void put(Job key, TileBitmap bitmap) {
+        if (this.workingSet.contains(key)) {
+            this.firstLevelTileCache.put(key, bitmap);
+        }
+        this.secondLevelTileCache.put(key, bitmap);
+    }
 
-	@Override
-	public void setWorkingSet(Set<Job> newWorkingSet) {
-		this.workingSet.clear();
-		this.workingSet.addAll(newWorkingSet);
-		this.firstLevelTileCache.setWorkingSet(this.workingSet);
-		this.secondLevelTileCache.setWorkingSet(this.workingSet);
-		for (Job job : workingSet) {
-			if (!firstLevelTileCache.containsKey(job) && secondLevelTileCache.containsKey(job)) {
-				TileBitmap tileBitmap = secondLevelTileCache.get(job);
-				if (tileBitmap != null) {
-					firstLevelTileCache.put(job, tileBitmap);
-				}
-			}
-		}
-	}
+    @Override
+    public void setWorkingSet(Set<Job> newWorkingSet) {
+        try {
+            this.workingSet.clear();
+            this.workingSet.addAll(newWorkingSet);
+            this.firstLevelTileCache.setWorkingSet(this.workingSet);
+            this.secondLevelTileCache.setWorkingSet(this.workingSet);
+            for (Job job : workingSet) {
+                if (!firstLevelTileCache.containsKey(job) && secondLevelTileCache.containsKey(job)) {
+                    TileBitmap tileBitmap = secondLevelTileCache.get(job);
+                    if (tileBitmap != null) {
+                        firstLevelTileCache.put(job, tileBitmap);
+                    }
+                }
+            }
+        } catch (ConcurrentModificationException ex) {
+            ex.printStackTrace();
+        }
+    }
 
 }
